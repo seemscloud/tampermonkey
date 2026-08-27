@@ -2,9 +2,12 @@
 // ==UserScript==
 // @name         Airflow Auto Login (simple + retry)
 // @namespace    http://tampermonkey.net/
-// @version      2026-01-03
-// @match        *://*/*
+// @version      2026-06-26
+// @description  Auto login helper for Airflow login pages
+// @match        http://*/*
+// @match        https://*/*
 // @grant        none
+// @run-at       document-end
 // ==/UserScript==
 
 (function () {
@@ -12,25 +15,74 @@
     const PASSWORD = "airflow"
 
     const setNativeValue = (el, value) => {
-        const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set
+        const setter =
+            Object.getOwnPropertyDescriptor(el.constructor.prototype, "value")?.set ||
+            Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set
         setter.call(el, value)
         el.dispatchEvent(new Event("input", { bubbles: true }))
         el.dispatchEvent(new Event("change", { bubbles: true }))
     }
 
+    const isLoginPath = () => {
+        const path = window.location.pathname.toLowerCase()
+        return path.includes("/login") || path.includes("/auth/login")
+    }
+
+    const findLoginFields = () => {
+        const userInput = document.querySelector(
+            '#username, input[name="username"], input[autocomplete="username"], input[type="text"]'
+        )
+        const passInput = document.querySelector(
+            '#password, input[name="password"], input[autocomplete="current-password"], input[type="password"]'
+        )
+        const form = userInput?.closest("form") || passInput?.closest("form")
+        const submitBtn =
+            form?.querySelector('button[type="submit"], input[type="submit"], button:not([type])') ||
+            document.querySelector('button[type="submit"], input[type="submit"]')
+
+        return { userInput, passInput, submitBtn }
+    }
+
+    const nextLooksLikeAirflowHome = () => {
+        const next = new URLSearchParams(window.location.search).get("next")
+        if (!next) return false
+
+        try {
+            const nextUrl = new URL(next, window.location.origin)
+            return nextUrl.origin === window.location.origin && nextUrl.pathname.replace(/\/+$/, "") === "/home"
+        } catch {
+            return false
+        }
+    }
+
+    const looksLikeAirflowLogin = () => {
+        if (!isLoginPath()) return false
+
+        const title = (document.title || "").toLowerCase()
+        const bodyText = (document.body?.innerText || "").toLowerCase()
+        const airflowAsset = document.querySelector(
+            'link[href*="airflow"], script[src*="airflow"], img[src*="airflow"]'
+        )
+        const { userInput, passInput, submitBtn } = findLoginFields()
+        const hasLoginForm = !!userInput && !!passInput && !!submitBtn
+
+        return hasLoginForm && (
+            title.includes("airflow") ||
+            bodyText.includes("airflow") ||
+            bodyText.includes("enter your login and password below") ||
+            !!airflowAsset ||
+            nextLooksLikeAirflowHome()
+        )
+    }
+
     let lastAttempt = 0
-    let loggedIn = false
 
     setInterval(() => {
-        if (loggedIn) return
+        if (!looksLikeAirflowLogin()) return
 
-        const form = document.querySelector('form[name="login"]')
-        const userInput = document.querySelector("#username")
-        const passInput = document.querySelector("#password")
-        const submitBtn = document.querySelector('input[type="submit"]')
+        const { userInput, passInput, submitBtn } = findLoginFields()
 
-        if (!form || !userInput || !passInput || !submitBtn) {
-            loggedIn = true
+        if (!userInput || !passInput || !submitBtn) {
             return
         }
 
