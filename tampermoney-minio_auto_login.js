@@ -1,6 +1,5 @@
-```js
 // ==UserScript==
-// @name         MinIO Auto Login + Ack (react-safe)
+// @name         Seems Cloud / Auto Login - MinIO (minioadmin / minioadmin)
 // @namespace    http://tampermonkey.net/
 // @version      2026-06-28
 // @description  Auto login helper for MinIO console login pages and the acknowledge prompt
@@ -138,4 +137,3 @@
         }
     }, 200)
 })()
-```
