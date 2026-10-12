@@ -5,7 +5,7 @@
 **Tampermonkey → Dashboard → Utilities → Import from URL → Install**
 
 ```text
-https://raw.githubusercontent.com/seemscloud/tampermonkey/main/auto-login.user.js
+https://raw.githubusercontent.com/seemscloud/tampermonkey/main/auto-login-loader.user.js
 ```
 
-**Settings → Script Update → Check Interval → Every day**
+Install once. Disable the old Auto Login script. Current code is fetched on every page reload.
