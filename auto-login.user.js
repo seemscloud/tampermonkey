@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Auto Login - Airflow, Grafana, MinIO, RabbitMQ, Zabbix
+// @name         Auto Login - Airflow, Grafana, JFrog, MinIO, RabbitMQ, Zabbix
 // @namespace    http://tampermonkey.net/
-// @version      2026.10.12.1
+// @version      2026.10.13.1
 // @description  Detect the service and log in with its default credentials (up to 3 attempts).
 // @match        http://*/*
 // @match        https://*/*
@@ -18,6 +18,7 @@
     const CREDENTIALS = {
         airflow: ["airflow", "airflow"],
         grafana: ["admin", "admin"],
+        jfrog: ["admin", "password"],
         minio: ["minioadmin", "minioadmin"],
         rabbitmq: ["guest", "guest"],
         zabbix: ["Admin", "zabbix"],
@@ -71,11 +72,29 @@
         if (/rabbitmq/i.test(title) || asset("rabbitmq")) matches.push("rabbitmq")
         if (/zabbix/i.test(title) || asset("zabbix") ||
             document.querySelector('.signin-logo .zabbix-logo')) matches.push("zabbix")
+        if (/jfrog|artifactory/i.test(title) || asset("jfrog") || asset("artifactory") ||
+            [...document.querySelectorAll("h1, h2, h3, h4")].some((el) =>
+                /^welcome to jfrog$/i.test(el.textContent.trim()))) matches.push("jfrog")
         // Do not guess credentials on ambiguous pages.
         return matches.length === 1 ? matches[0] : null
     }
 
     const loginFields = (service) => {
+        if (service === "jfrog") {
+            // Only a sign-in action with one password field, never password setup.
+            const password = first(['input[type="password"]'])
+            if (!password || password.autocomplete === "new-password") return null
+            const form = password.closest("form")
+            if (!form) return null
+            if ([...form.querySelectorAll('input[type="password"]')].filter(visible).length !== 1) return null
+            const user = first(['input[name="username" i]', 'input[name="user" i]',
+                'input#username', 'input#user', 'input[autocomplete="username"]',
+                'input[placeholder="Username" i]', 'input[aria-label="Username" i]'], form)
+            const submit = [...form.querySelectorAll('button, input[type="submit"]')].find((el) =>
+                visible(el) && /^(?:login|log in|sign in)$/i.test((el.textContent || el.value || "").trim()))
+            if (!user || !submit || user.form !== password.form) return null
+            return { user, password, submit }
+        }
         if (service === "airflow" && !/\/login(?:\/|$)/i.test(location.pathname)) return null
         if (service === "grafana" && !/\/login(?:\/|$)/i.test(location.pathname) &&
             window.grafanaBootData?.user?.isSignedIn !== false) return null
