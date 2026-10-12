@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Seems Cloud / Auto Login - Airflow (airflow / airflow)
+// @name         Auto Login - Airflow (airflow / airflow)
 // @namespace    http://tampermonkey.net/
 // @version      2026-06-26
 // @description  Auto login helper for Airflow login pages

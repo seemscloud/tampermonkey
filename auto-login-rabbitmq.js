@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Seems Cloud / Auto Login - RabbitMQ (guest / guest)
+// @name         Auto Login - RabbitMQ (guest / guest)
 // @namespace    http://tampermonkey.net/
 // @version      2026-10-12
 // @description  Automatically fill guest credentials and try logging in up to 3 times per page load

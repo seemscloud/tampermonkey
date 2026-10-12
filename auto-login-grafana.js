@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Seems Cloud / Auto Login - Grafana (admin / admin)
+// @name         Auto Login - Grafana (admin / admin)
 // @namespace    http://tampermonkey.net/
 // @version      2026-06-28
 // @description  Auto login helper for Grafana login pages and the initial password setup skip screen

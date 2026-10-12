@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Seems Cloud / Auto Login - Zabbix (Admin / zabbix)
+// @name         Auto Login - Zabbix (Admin / zabbix)
 // @namespace    http://tampermonkey.net/
 // @version      2026-10-12
 // @description  Auto login to Zabbix; at most 3 attempts per tab and installation, including reloads
