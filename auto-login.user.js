@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Login - Airflow, Grafana, JFrog, MinIO, RabbitMQ, Zabbix
 // @namespace    http://tampermonkey.net/
-// @version      2026.10.13.1
+// @version      2026.10.15.1
 // @description  Detect the service and log in with its default credentials (up to 3 attempts).
 // @match        http://*/*
 // @match        https://*/*
@@ -172,10 +172,16 @@
         const fields = loginFields(service)
         if (!fields) return
         const { user, password, submit } = fields
-        if (![user, password, submit].every(enabled) || user.readOnly || password.readOnly) return
-        attempt(service, "login", () => {
-            const [username, secret] = CREDENTIALS[service]
-            if (setValue(user, username) && setValue(password, secret) && enabled(submit)) submit.click()
-        })
+        if (![user, password].every(enabled) || user.readOnly || password.readOnly) return
+        const [username, secret] = CREDENTIALS[service]
+        if (user.value !== username || password.value !== secret) {
+            setValue(user, username)
+            setValue(password, secret)
+            // Let React/Vue update validation and enable the submit button.
+            // Filling fields is not a login attempt.
+            return
+        }
+        if (!enabled(submit)) return
+        attempt(service, "login", () => submit.click())
     }, 200)
 })()
