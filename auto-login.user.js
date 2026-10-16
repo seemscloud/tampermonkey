@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Login - Airflow, Grafana, JFrog, MinIO, RabbitMQ, Zabbix
 // @namespace    http://tampermonkey.net/
-// @version      2026.10.15.1
+// @version      2026.10.17.1
 // @description  Detect the service and log in with its default credentials (up to 3 attempts).
 // @match        http://*/*
 // @match        https://*/*
@@ -17,7 +17,7 @@
 
     const CREDENTIALS = {
         airflow: ["airflow", "airflow"],
-        grafana: ["admin", "admin"],
+        grafana: ["grafana", "grafana"],
         jfrog: ["admin", "password"],
         minio: ["minioadmin", "minioadmin"],
         rabbitmq: ["guest", "guest"],
